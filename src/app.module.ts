@@ -1,29 +1,37 @@
 import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { handleRetry, TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './user/entities/user.entity';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 
 @Module({
-  imports: [UserModule, 
-  
-    ConfigModule.forRoot({ isGlobal: true }),
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+     JwtModule.register({
+        secret:"1234",
+        signOptions:{expiresIn:"1d"},
+        global:true
+     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get('DATABASE_HOST'), 
-        port: configService.get('DATABASE_PORT'),
-        username: configService.get('DATABASE_USER'), 
-        password: configService.get('DATABASE_PASSWORD'),
-        database: configService.get('DATABASE_NAME'), 
+        host: configService.get<string>('DATABASE_HOST'), 
+        port: +configService.get<number>('DATABASE_PORT'), 
+        username: configService.get<string>('DATABASE_USER'), 
+        password: configService.get<string>('DATABASE_PASSWORD'), 
+        database: configService.get<string>('DATABASE_NAME'), 
         ssl: { rejectUnauthorized: false },
-       entities:[User],
-        autoLoadEntities: true,
+        entities: [User], 
+        autoLoadEntities: true, 
         synchronize: true, 
       }),
       inject: [ConfigService],
     }),
+    UserModule,
   ],
   providers: []
 })
