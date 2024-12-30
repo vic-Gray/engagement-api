@@ -4,6 +4,9 @@ import { handleRetry, TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './user/entities/user.entity';
 import { JwtModule, JwtService } from '@nestjs/jwt';
+import { EngageModule } from './engage/engage.module';
+import { Engage } from './engage/entities/engage.entity';
+
 
 @Module({
   imports: [
@@ -25,13 +28,15 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
         password: configService.get<string>('DATABASE_PASSWORD'), 
         database: configService.get<string>('DATABASE_NAME'), 
         ssl: { rejectUnauthorized: false },
-        entities: [User], 
+        entities: [User,Engage], 
         autoLoadEntities: true, 
         synchronize: true, 
       }),
       inject: [ConfigService],
     }),
     UserModule,
+    EngageModule,
+  
   ],
   providers: []
 })

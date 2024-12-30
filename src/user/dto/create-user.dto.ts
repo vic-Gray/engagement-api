@@ -25,6 +25,6 @@ export class CreateUserDto {
           userName:string;
 
           @IsString()
-          role:string
+          role:Role
     
 }

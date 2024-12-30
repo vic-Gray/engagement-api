@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Engage } from 'src/engage/entities/engage.entity';
+import { Role } from 'src/Roles/roles.auth';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity()
 export class User {
@@ -20,6 +22,14 @@ export class User {
   @Column({ nullable: true })
   phone: string;
 
+
+  @Column({
+    type:"enum",
+    enum:Role,
+    default:Role.USER
+  })
+    
+
   @Column({ default: 'user' }) 
   role: string;
 
@@ -28,4 +38,7 @@ export class User {
 
   @Column({ nullable: true })
   profilePicture: string;
+
+
+  @OneToMany(() => Engage,(engage) =>  engage.user, {cascade:true} ) engage:Engage[]
 }

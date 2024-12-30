@@ -32,15 +32,6 @@ export class UserController {
 
 
 
-
-
-
-
-
-
-
-
-
   @UseGuards(UserGuard)
   @Post(':id/upload-profile-picture')
   @UseInterceptors(FileInterceptor('file', {

@@ -14,9 +14,9 @@ export class jwtGuards extends AuthGuard('jwt'){
         if (err || !user) {
           throw err || new UnauthorizedException();
         }
-        if (user.user.role != 'ADMIN') {
+        if (user.role != 'ADMIN') {
           console.log(user);
-          throw new BadRequestException(`${user.user.name} you are not an admin`);
+          throw new BadRequestException(`${user.email} you are not an admin`);
         }
         return user;
       }
