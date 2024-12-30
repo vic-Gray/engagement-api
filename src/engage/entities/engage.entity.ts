@@ -8,7 +8,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "ty
 @Entity()
 export class Engage {
    @PrimaryGeneratedColumn()
-    id:string;
+    id:number;
 
 
     @Column()

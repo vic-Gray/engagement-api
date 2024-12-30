@@ -41,4 +41,5 @@ export class User {
 
 
   @OneToMany(() => Engage,(engage) =>  engage.user, {cascade:true} ) engage:Engage[]
+  static user: any;
 }

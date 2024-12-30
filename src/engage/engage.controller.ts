@@ -3,21 +3,23 @@ import { EngageService } from './engage.service';
 import { CreateEngageDto } from './dto/create-engage.dto';
 import { UpdateEngageDto } from './dto/update-engage.dto';
 import { jwtGuards } from 'src/Roles/jwt.guards';
+import { dtoId } from 'src/Dto/dto.user';
 
 @Controller('engage')
 export class EngageController {
   constructor(private readonly engageService: EngageService) {}
 
 
-@UseGuards(jwtGuards)
-  @Post("create")
-  create(@Body() createEngageDto: CreateEngageDto,id, @Request() req) {
-    return this.engageService.create(createEngageDto,id);
+  @UseGuards(jwtGuards)
+  @Post('create')
+  async createEvent(@Body() createEventDto: CreateEngageDto, @Request() req) {
+    console.log(req.user);
+    return this.engageService.create(createEventDto, req.user);
+  
   }
-
   @Get()
-  findAll() {
-    return this.engageService.findAll();
+  indAllEngagement() {
+    return this.engageService.findAllEngagement();
   }
 
   @Get(':id')
@@ -31,7 +33,7 @@ export class EngageController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.engageService.remove(+id);
+  remove(@Param() {id}: dtoId, ) {
+    return this.engageService.remove(id);
   }
 }

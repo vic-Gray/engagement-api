@@ -16,7 +16,7 @@ export class jwtGuards extends AuthGuard('jwt'){
         }
         if (user.role != 'ADMIN') {
           console.log(user);
-          throw new BadRequestException(`${user.email} you are not an admin`);
+          throw new BadRequestException(`${user.name} you are not eligable to create an engagement`);
         }
         return user;
       }

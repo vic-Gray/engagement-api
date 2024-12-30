@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateEngageDto } from './dto/create-engage.dto';
 import { UpdateEngageDto } from './dto/update-engage.dto';
 import { Engage } from './entities/engage.entity';
@@ -13,14 +13,41 @@ export class EngageService {
     @InjectRepository(Engage) private readonly engageRepo:Repository<Engage>, @InjectRepository(User) private readonly userRepo:Repository<User>
   )
   {}
-  async create({category, link, description}: CreateEngageDto, id:number) {
-     const userValid = await this.userRepo.findOneBy({id})
-     console.log(userValid);
+  async create( {link, category, description}: CreateEngageDto,user:any) {
+    const realUser = user
+    console.log('User from JWT:', user);
+     const userProfile = [
+       user.name,
+       user.email
+     ]
+    const userValid = await this.userRepo.findOne({ where: { id: user.sub } });
+  
+    console.log('User from Database:', userValid);
+  
+    if (!userValid) {
+      throw new UnauthorizedException('Sorry, cannot create this event');
+    }
+  
+    const newEvent = this.engageRepo.create({
+      link,
+      category,
+      description,
+      user: userValid,  
+    });
+
+    const latest = await this.engageRepo.save(newEvent,user);
+ 
+    console.log('Saved Event:', latest);
+  
+    return {
+      userProfile,
+      latest
+    };
      
   }
 
-  findAll() {
-    return `This action returns all engage`;
+  async findAllEngagement() {
+    return await this.engageRepo.find()
   }
 
   findOne(id: number) {
@@ -31,7 +58,20 @@ export class EngageService {
     return `This action updates a #${id} engage`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} engage`;
+ async remove(id: number) {
+    if (isNaN(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+
+    const user = await this.engageRepo.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    await this.engageRepo.delete({ id });
+
+    return {
+      message: ' engagement has been deleted successfully',
+    };
   }
 }

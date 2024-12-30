@@ -67,7 +67,8 @@ export class UserService {
       sub: user.id,
       email: user.email,
       role: user.role,
-      name:user.userName
+      userName:user.userName
+      
     };
     return {
       access_token: this.JwtService.sign(payload),
