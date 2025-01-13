@@ -6,6 +6,7 @@ import { User } from './user/entities/user.entity';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { EngageModule } from './engage/engage.module';
 import { Engage } from './engage/entities/engage.entity';
+import { TaskModule } from './task/task.module';
 
 
 @Module({
@@ -36,6 +37,7 @@ import { Engage } from './engage/entities/engage.entity';
     }),
     UserModule,
     EngageModule,
+    TaskModule,
   
   ],
   providers: []

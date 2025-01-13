@@ -22,6 +22,10 @@ export class Engage {
        @Column()
          description:string;
 
+
+         @Column({nullable:true})
+         engagementPhoto:string
+
         
        @ManyToOne(() => User, (user) => user.engage, {eager:true, onDelete:"CASCADE", onUpdate:"CASCADE"}) user:User;
 

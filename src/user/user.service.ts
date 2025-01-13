@@ -75,17 +75,21 @@ export class UserService {
     };
   }
 
-
   async updateProfilePicture(id: number, profilePictureUrl: string): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
+     console.log(User);
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    user.profilePicture = profilePictureUrl;
-    return this.userRepository.save(user);
+    user.profilePicture= profilePictureUrl;  
+    return this.userRepository.save(user); 
   }
+
+
+
+
 
   async findAll() {
     return await this.userRepository.find();

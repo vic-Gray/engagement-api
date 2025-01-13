@@ -46,6 +46,22 @@ export class EngageService {
      
   }
 
+  async updateProfilePicture(id: number, profilePictureUrl: string) {
+   const engagement  = await this.engageRepo.findOneBy({id})
+      if(!engagement){
+        throw new NotFoundException('Engagement not found');
+      }
+     
+      engagement.engagementPhoto= profilePictureUrl;  
+
+      await this.engageRepo.save(engagement);
+
+      return {
+        message: 'Profile picture updated successfully!',
+        url: profilePictureUrl,
+      };
+  }
+
   async findAllEngagement() {
     return await this.engageRepo.find()
   }

@@ -10,6 +10,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage, memoryStorage } from 'multer';
 import { Observable, of } from 'rxjs';
 import { UserGuard } from 'src/Roles/user.guards';
+import { jwtGuards } from 'src/Roles/jwt.guards';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -33,7 +34,7 @@ export class UserController {
 
 
   @UseGuards(UserGuard)
-  @Post(':id/upload-profile-picture')
+  @Post('upload-user-profile-picture')
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({
       destination: './uploads/profile-pictures', 
@@ -44,14 +45,14 @@ export class UserController {
       }
     }),
     fileFilter: (req, file, cb) => {
-    
+  
       if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
         return cb(new Error('Only image files are allowed!'), false);
       }
       cb(null, true);
     }
   }))
-  async uploadProfilePicture(@Param() id: number, @UploadedFile() file: Express.Multer.File) {
+  async uploadProfilePicture(@Param('id') id: number, @UploadedFile() file: Express.Multer.File) {
     const profilePictureUrl = `/uploads/profile-pictures/${file.filename}`;
     await this.userService.updateProfilePicture(id, profilePictureUrl);
     return {
@@ -59,8 +60,6 @@ export class UserController {
       url: profilePictureUrl,
     };
   }
-
-    
 
 
   @Get()
