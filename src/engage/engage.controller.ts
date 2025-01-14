@@ -16,10 +16,10 @@ export class EngageController {
   @UseGuards(jwtGuards)
   @Post('create')
   async createEvent(@Body() createEventDto: CreateEngageDto, @Request() req) {
-    console.log(req.user);
+    console.log('Authenticated User:', { id: req.user.id, email: req.user.email });
     return this.engageService.create(createEventDto, req.user);
-  
   }
+  
 
    @UseGuards(jwtGuards)
      @Post('upload-engage-profile-picture')

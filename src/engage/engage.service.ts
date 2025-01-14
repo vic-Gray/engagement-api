@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateEngageDto } from './dto/create-engage.dto';
 import { UpdateEngageDto } from './dto/update-engage.dto';
 import { Engage } from './entities/engage.entity';
@@ -13,38 +13,42 @@ export class EngageService {
     @InjectRepository(Engage) private readonly engageRepo:Repository<Engage>, @InjectRepository(User) private readonly userRepo:Repository<User>
   )
   {}
-  async create( {link, category, description}: CreateEngageDto,user:any) {
-    const realUser = user
-    console.log('User from JWT:', user);
-     const userProfile = [
-       user.name,
-       user.email
-     ]
-    const userValid = await this.userRepo.findOne({ where: { id: user.sub } });
   
-    console.log('User from Database:', userValid);
+  async create({ link, category, description }: CreateEngageDto, user: any) {
+    console.log('User from JWT:', { id: user.id, email: user.email });
   
+    // Fetch user from database
+    const userValid = await this.userRepo.findOneBy({ id: user.id });
     if (!userValid) {
-      throw new UnauthorizedException('Sorry, cannot create this event');
+      throw new UnauthorizedException('User not found');
     }
   
+    console.log('User from Database:', { id: userValid.id, email: userValid.email });
+  
+    // Verify role
+    if (userValid.role !== 'ADMIN') {
+      throw new ForbiddenException('You do not have permission to create this event');
+    }
+  
+    // Create and save the event
     const newEvent = this.engageRepo.create({
       link,
       category,
       description,
-      user: userValid,  
+      user: userValid,
     });
-
-    const latest = await this.engageRepo.save(newEvent,user);
- 
-    console.log('Saved Event:', latest);
+  
+    const latest = await this.engageRepo.save(newEvent);
+  
+    console.log('Saved Event:', { id: latest.id, category: latest.category, link: latest.link });
   
     return {
-      userProfile,
-      latest
+      userProfile: [userValid.firstName, userValid.email],
+      latest,
     };
-     
   }
+  
+  
 
   async updateProfilePicture(id: number, profilePictureUrl: string) {
    const engagement  = await this.engageRepo.findOneBy({id})
