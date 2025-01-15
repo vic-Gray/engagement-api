@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException, NotFoundException, Inject } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,15 +6,16 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { Role } from 'src/Roles/roles.auth';
 import { logInDto } from 'src/Dto/logIn.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    private readonly JwtService: JwtService,
+    private readonly jwtService: JwtService,
+    @Inject('CLOUDINARY') private readonly cloudinary: any,
   ) {}
 
   async create({ firstName, password, email, phone, userName, role, lastName }: CreateUserDto) {
@@ -28,7 +29,7 @@ export class UserService {
       throw new UnauthorizedException('Sorry, phone is already in use');
     }
 
-    const shortUuid = uuidv4().slice(0, 6); 
+    const shortUuid = uuidv4().slice(0, 6);
     const displayName = `@${userName}_${shortUuid}`;
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -46,50 +47,51 @@ export class UserService {
     return newUser;
   }
 
-  
   async login(loginDto: logInDto) {
     const { email, password } = loginDto;
-
-    // Find the user by email
     const user = await this.userRepository.findOneBy({ email });
     if (!user) {
       throw new NotFoundException('Invalid email or password');
     }
 
-    // Compare the password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    // Sign JWT and return it
     const payload = {
       sub: user.id,
       email: user.email,
       role: user.role,
-      userName:user.userName
-      
+      userName: user.userName,
     };
     return {
-      access_token: this.JwtService.sign(payload),
+      access_token: this.jwtService.sign(payload),
     };
+  }
+
+  async uploadToCloudinary(file: Express.Multer.File): Promise<UploadApiResponse> {
+    return new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        { folder: 'profile-pictures' },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      ).end(file.buffer);
+    });
   }
 
   async updateProfilePicture(id: number, profilePictureUrl: string): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
-     console.log(User);
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    user.profilePicture= profilePictureUrl;  
-    return this.userRepository.save(user); 
+    user.profilePicture = profilePictureUrl;
+    return this.userRepository.save(user);
   }
-
-
-
-
 
   async findAll() {
     return await this.userRepository.find();
@@ -142,10 +144,6 @@ export class UserService {
     return {
       message: 'Your account has been deleted successfully',
     };
-  }
-
-  async findByEmail(email: string) {
-    return this.userRepository.findOneBy({ email });
   }
 
   async searchUserByName(name: string): Promise<User[]> {

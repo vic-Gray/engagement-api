@@ -17,7 +17,6 @@ export class EngageService {
   async create({ link, category, description }: CreateEngageDto, user: any) {
     console.log('User from JWT:', { id: user.id, email: user.email });
   
-    // Fetch user from database
     const userValid = await this.userRepo.findOneBy({ id: user.id });
     if (!userValid) {
       throw new UnauthorizedException('User not found');
@@ -25,12 +24,12 @@ export class EngageService {
   
     console.log('User from Database:', { id: userValid.id, email: userValid.email });
   
-    // Verify role
+
     if (userValid.role !== 'ADMIN') {
       throw new ForbiddenException('You do not have permission to create this event');
     }
   
-    // Create and save the event
+
     const newEvent = this.engageRepo.create({
       link,
       category,
