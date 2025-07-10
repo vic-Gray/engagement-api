@@ -95,7 +95,7 @@ Open to contributions and suggestions — feel free to fork and make PRs. More e
 
 **Victory Gray**  
 Backend Developer | Problem Solver | API Architect  
-[GitHub](https://github.com/vic-Gray) • [LinkedIn](https://www.linkedin.com/in/victory-gray/) • [Email](victorygray59@gmail.com)
+[GitHub](https://github.com/vic-Gray) • [LinkedIn]([https://www.linkedin.com/in/victory-gray/](https://www.linkedin.com/in/victory-gray-)) • [Email](victorygray59@gmail.com)
 
 ---
 
